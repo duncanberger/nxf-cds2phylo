@@ -1,5 +1,7 @@
+
+
 def helpMessage() {
-        log.info"""
+	log.info"""
 Usage:
 Mandatory arguments:
 Velvet options:
@@ -12,6 +14,9 @@ Skip metrics:
 params.index = file(params.input)
 params.outdir = "results"
 params.phylo_method = "fasttree"
+params.snpsites = true
+params.partition = false
+params.prefix = "out"
 
 workflow {
     Boolean flag = false
@@ -19,18 +24,21 @@ workflow {
     .ifEmpty {exit 1, log.info "Cannot find path file ${csvFile}"} \
     .splitText {it.strip() } \
     .map { it -> tuple(it) } \
-    .set {axt}
+    .set {axt}     
     main:
      split(axt)
      align(split.out)
      trim(align.out)
      concatx(trim.out.collect())
+    if (params.snpsites == true & params.partition == false) {
+    snpsites(concatx.out) }
+    else {}
     if (params.phylo_method == "fasttree" ) {
-    fasttree(concatx.out)
-    }
-    if (params.phylo_method == "iqtree" ) {
-    iqtree(concatx.out)
-    }
+    fasttree(snpsites.out) }
+    if (params.phylo_method == "iqtree" & params.partition == true) {
+    iqtree_partition(trim.out.collect()) }
+    if (params.phylo_method == "iqtree" & params.partition == false) {
+    iqtree_supertree(snpsites.out) }
 }
 
 process split {
@@ -45,7 +53,7 @@ process split {
 
     script:
     """
-    seqkit grep -r -n -p ${genes} $baseDir/subset.test.fasta > ${genes}.fa
+    seqkit grep -j 4 -r -n -p ${genes} $baseDir/subset.test.fasta > ${genes}.fa
     """
 }
 
@@ -90,11 +98,28 @@ process concatx {
     path("*.trimal")
 
     output:
-    path("concat_all.txt")
+    path("${params.prefix}.aln")
 
     script:
     """
-    python $baseDir/scripts/concat_aln.py --input *.trimal --output concat_all.txt
+    python $baseDir/scripts/concat_aln.py --input *.trimal --output ${params.prefix}.aln
+    """
+}
+
+process snpsites {
+    cpus = 1
+    tag "X"
+    publishDir "$params.outdir/", mode: 'copy'
+
+    input:
+    path("${params.prefix}.aln")
+
+    output:
+    path("${params.prefix}.snpsites")
+
+    script:
+    """
+    snp-sites ${params.prefix}.aln -o ${params.prefix}.snpsites
     """
 }
 
@@ -104,30 +129,49 @@ process fasttree {
     publishDir "$params.outdir/", mode:'copy'
 
     input:
-    path("concat_all.txt")
+    path("${params.prefix}.snpsites")
 
     output:
-    path("out.tree")
+    path("${params.prefix}.fasttree")
 
     script:
     """
-    FastTreeMP -gtr -nt -log logfile < concat_all.txt > out.tree
-    """
+    FastTreeMP -gtr -nt -log logfile < ${params.prefix}.snpsites > ${params.prefix}.fasttree
+    """    
 }
 
-process iqtree {
+process iqtree_supertree {
     cpus = 4
     tag "X"
     publishDir "$params.outdir/", mode:'copy'
 
     input:
-    path("concat_all.txt")
+    path("${params.prefix}.snpsites")
 
     output:
-    path("concat_all.txt.treefile")
+    path("${params.prefix}.treefile")
 
     script:
     """
-    iqtree -T 4 -s concat_all.txt -m MFP
+    iqtree -T 4 -s ${params.prefix}.snpsites --prefix $params.prefix -m MFP+ASC
+    """
+}
+
+process iqtree_partition {
+    cpus = 4
+    tag "X"
+    publishDir "$params.outdir/", mode:'copy'
+
+    input:
+    path("*.trimal")
+
+    output:
+    path("${params.prefix}.treefile")
+
+    script:
+    """
+    mkdir -p temp 
+    mv *.trimal temp/
+    iqtree -T 4 -p temp/ --prefix $params.prefix -m MFP
     """
 }
