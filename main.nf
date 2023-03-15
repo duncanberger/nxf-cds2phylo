@@ -4,9 +4,7 @@ def helpMessage() {
 	log.info"""
 Usage:
 Mandatory arguments:
-Velvet options:
-BUSCO options:
-Run options:
+Optional arguments:
 Skip metrics:
     """.stripIndent()
 }
@@ -53,7 +51,7 @@ process split {
 
     script:
     """
-    seqkit grep -j 4 -r -n -p ${genes} $baseDir/subset.test.fasta > ${genes}.fa
+    seqkit grep -j 4 -r -n -p ${genes} $baseDir/subset.test2.fasta > ${genes}.fa
     """
 }
 
@@ -149,11 +147,11 @@ process iqtree_supertree {
     path("${params.prefix}.snpsites")
 
     output:
-    path("${params.prefix}.treefile")
+    path("${params.prefix}.iqtree_supertree.treefile")
 
     script:
     """
-    iqtree -T 4 -s ${params.prefix}.snpsites --prefix $params.prefix -m MFP+ASC
+    iqtree -T 4 -s ${params.prefix}.snpsites --prefix ${params.prefix}.iqtree_supertree -m MFP+ASC
     """
 }
 
@@ -166,12 +164,12 @@ process iqtree_partition {
     path("*.trimal")
 
     output:
-    path("${params.prefix}.treefile")
+    path("${params.prefix}.iqtree_partition.treefile")
 
     script:
     """
     mkdir -p temp 
     mv *.trimal temp/
-    iqtree -T 4 -p temp/ --prefix $params.prefix -m MFP
+    iqtree -T 4 -p temp/ --prefix ${params.prefix}.iqtree_partition -m MFP
     """
 }
