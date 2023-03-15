@@ -29,8 +29,8 @@ workflow {
      split(axt)
      align(split.out)
      trim(align.out)
-     concatx(trim.out.collect())
     if (params.snpsites == true & params.partition == false) {
+    concatx(trim.out.collect())
     snpsites(concatx.out) }
     else {}
     if (params.phylo_method == "fasttree" ) {
