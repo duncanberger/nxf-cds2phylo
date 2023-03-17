@@ -3,10 +3,34 @@
 def helpMessage() {
 	log.info"""
 Usage:
+	nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta	
+
 Mandatory arguments:
+	--input				Path to file containing list of geneIDs to include
+	--fasta				Path to file containing fasta sequences to process
+
 Optional arguments:
-Skip metrics:
+	--prefix			Output file prefix ["out"]
+	--outdir			Output directory ["results"]
+	--phylo_model			Use Fasttree or IQTREE ["fasttree"]
+	--iqtree_parameters		Other parameters to pass to IQTREE [""]
+	--partition			Do partitioned analysis instead of supermatrix [false]
+	--iqtree_model_supermatrix	IQTREE supermatrix analysis model ["MFP+ASC"]
+	--iqtree_model_partition	IQTREE partioned analysis model ["MFP"]
+	--skip_tree			Skips creating the phylogeny [false]
     """.stripIndent()
+}
+
+if (!params.fasta){
+    log.error "Error: '--fasta' parameter is missing"
+    helpMessage()
+    exit 0
+}
+
+if (!params.input){
+    log.error "Error: '--input' parameter is missing"
+    helpMessage()
+    exit 0
 }
 
 params.index = file(params.input)
@@ -15,6 +39,10 @@ params.phylo_method = "fasttree"
 params.snpsites = true
 params.partition = false
 params.prefix = "out"
+params.iqtree_model_supermatrix = "MFP+ASC"
+params.iqtree_model_partition = "MFP"
+params.iqtree_parameters = ""
+params.skip_tree = false
 
 workflow {
     Boolean flag = false
@@ -31,16 +59,17 @@ workflow {
     concatx(trim.out.collect())
     snpsites(concatx.out) }
     else {}
-    if (params.phylo_method == "fasttree" ) {
+    if (params.phylo_method == "fasttree" & params.skip_tree == false) {
     fasttree(snpsites.out) }
-    if (params.phylo_method == "iqtree" & params.partition == true) {
+    if (params.phylo_method == "iqtree" & params.partition == true & params.skip_tree == false) {
     iqtree_partition(trim.out.collect()) }
-    if (params.phylo_method == "iqtree" & params.partition == false) {
+    if (params.phylo_method == "iqtree" & params.partition == false & params.skip_tree == false) {
     iqtree_supertree(snpsites.out) }
+    if (params.skip_tree == true) {}
 }
 
 process split {
-    cpus = 4
+    cpus = 1
     tag "X"
 
     input:
@@ -51,7 +80,7 @@ process split {
 
     script:
     """
-    seqkit grep -j 4 -r -n -p ${genes} $baseDir/subset.test2.fasta > ${genes}.fa
+    seqkit grep -j 1 -r -n -p ${genes} <(grep -v '^+' $baseDir/${params.fasta}) > ${genes}.fa
     """
 }
 
@@ -151,7 +180,7 @@ process iqtree_supertree {
 
     script:
     """
-    iqtree -T 4 -s ${params.prefix}.snpsites --prefix ${params.prefix}.iqtree_supertree -m MFP+ASC
+    iqtree -T 4 -s ${params.prefix}.snpsites --prefix ${params.prefix}.iqtree_supertree -m ${params.iqtree_model_supermatrix} ${params.iqtree_parameters}
     """
 }
 
@@ -170,6 +199,6 @@ process iqtree_partition {
     """
     mkdir -p temp 
     mv *.trimal temp/
-    iqtree -T 4 -p temp/ --prefix ${params.prefix}.iqtree_partition -m MFP
+    iqtree -T 4 -p temp/ --prefix ${params.prefix}.iqtree_partition -m ${params.iqtree_model_partition} ${params.iqtree_parameters}
     """
 }
