@@ -1,23 +1,21 @@
-
-
 def helpMessage() {
-	log.info"""
+        log.info"""
 Usage:
-	nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta	
+        nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta
 
 Mandatory arguments:
-	--input				Path to file containing list of geneIDs to include
-	--fasta				Path to file containing fasta sequences to process
+        --input                         Path to file containing list of geneIDs to include
+        --fasta                         Path to file containing fasta sequences to process
 
 Optional arguments:
-	--prefix			Output file prefix ["out"]
-	--outdir			Output directory ["results"]
-	--phylo_model			Use Fasttree or IQTREE ["fasttree"]
-	--iqtree_parameters		Other parameters to pass to IQTREE [""]
-	--partition			Do partitioned analysis instead of supermatrix [false]
-	--iqtree_model_supermatrix	IQTREE supermatrix analysis model ["MFP+ASC"]
-	--iqtree_model_partition	IQTREE partioned analysis model ["MFP"]
-	--skip_tree			Skips creating the phylogeny [false]
+        --prefix                        Output file prefix ["out"]
+        --outdir                        Output directory ["results"]
+        --phylo_model                   Use Fasttree or IQTREE ["fasttree"]
+        --iqtree_parameters             Other parameters to pass to IQTREE [""]
+        --partition                     Do partitioned analysis instead of supermatrix [false]
+        --iqtree_model_supermatrix      IQTREE supermatrix analysis model ["MFP+ASC"]
+        --iqtree_model_partition        IQTREE partioned analysis model ["MFP"]
+        --skip_tree                     Skips creating the phylogeny [false]
     """.stripIndent()
 }
 
@@ -50,7 +48,7 @@ workflow {
     .ifEmpty {exit 1, log.info "Cannot find path file ${csvFile}"} \
     .splitText {it.strip() } \
     .map { it -> tuple(it) } \
-    .set {axt}     
+    .set {axt}
     main:
      split(axt)
      align(split.out)
@@ -69,7 +67,7 @@ workflow {
 }
 
 process split {
-    cpus = 1
+    cpus = 4
     tag "X"
 
     input:
@@ -85,7 +83,7 @@ process split {
 }
 
 process align {
-    cpus = 1
+    cpus = 4
     tag "X"
 
     input:
@@ -101,14 +99,14 @@ process align {
 }
 
 process trim {
-    cpus = 1
+    cpus = 4
     tag "X"
 
     input:
     tuple val(genes), path("${genes}.aln")
 
     output:
-    path("${genes}.trimal")
+    path("*.trimal")
 
     script:
     """
@@ -117,7 +115,7 @@ process trim {
 }
 
 process concatx {
-    cpus = 1
+    cpus = 4
     tag "X"
     publishDir "$params.outdir/", mode: 'copy'
 
@@ -134,7 +132,7 @@ process concatx {
 }
 
 process snpsites {
-    cpus = 1
+    cpus = 4
     tag "X"
     publishDir "$params.outdir/", mode: 'copy'
 
@@ -164,7 +162,7 @@ process fasttree {
     script:
     """
     FastTreeMP -gtr -nt -log logfile < ${params.prefix}.snpsites > ${params.prefix}.fasttree
-    """    
+    """
 }
 
 process iqtree_supertree {
@@ -197,7 +195,7 @@ process iqtree_partition {
 
     script:
     """
-    mkdir -p temp 
+    mkdir -p temp
     mv *.trimal temp/
     iqtree -T 4 -p temp/ --prefix ${params.prefix}.iqtree_partition -m ${params.iqtree_model_partition} ${params.iqtree_parameters}
     """
