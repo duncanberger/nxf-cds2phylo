@@ -28,6 +28,26 @@ git clone https://github.com/duncanberger/nxf-cds2phylo.git
 mamba env create -f env.yaml
 ```
 ## Running cds2phylo <a name="run"></a>
+
+### Usage
+```
+Usage:
+        nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta
+
+Mandatory arguments:
+        --input                         Path to file containing list of geneIDs to include
+        --fasta                         Path to file containing fasta sequences to process
+
+Optional arguments:
+        --prefix                        Output file prefix ["out"]
+        --outdir                        Output directory ["results"]
+        --phylo_model                   Use Fasttree or IQTREE ["fasttree"]
+        --iqtree_parameters             Other parameters to pass to IQTREE [""]
+        --partition                     Do partitioned analysis instead of supermatrix [false]
+        --iqtree_model_supermatrix      IQTREE supermatrix analysis model ["MFP+ASC"]
+        --iqtree_model_partition        IQTREE partioned analysis model ["MFP"]
+        --skip_tree                     Skips creating the phylogeny [false]
+```
 ### Single phylogeny
 ```
 nextflow run main.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
