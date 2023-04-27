@@ -21,3 +21,6 @@ The pipeline takes a FASTA format file of unaligned nucleotide sequences (CDSs) 
 
 ## Installation <a name="install"></a>
 ## Running cds2phylo <a name="run"></a>
+```
+nextflow run main.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
+```
