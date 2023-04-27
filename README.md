@@ -29,7 +29,7 @@ mamba env create -f env.yaml
 ```
 ## Running cds2phylo <a name="run"></a>
 
-### Usage
+#### Usage
 ```
 Usage:
         nextflow run cds2phylo.nf  --fasta <FASTA> --input <GENE LIST>
@@ -48,7 +48,7 @@ Optional arguments:
         --iqtree_model_partition        IQTREE partioned analysis model ["MFP"]
         --skip_tree                     Skips creating the phylogeny [false]
 ```
-### Single phylogeny
+#### Single phylogeny
 ```
 nextflow run cds2phylo.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
 ```
