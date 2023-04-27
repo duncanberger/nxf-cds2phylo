@@ -5,7 +5,7 @@
 * [Pipeline summary](#pipeline_summary)
 * [Installation](#install)
 * [Running cds2phylo](#run)
-
+* [Input format](#input)
 
 ## Introduction <a name="Introduction"></a>
 **cds2phylo** is a Nextflow pipeline for to create phylogenies based on alignments of large number of (core) genes. 
@@ -56,3 +56,10 @@ nextflow run cds2phylo.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LI
 ```
 nextflow run drak.nf --prefix <SAMPLE_ID> --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
 ```
+## Input format <a name="input"></a>
+#### FASTA
+FASTA headers can be in any format but they will be searched using the <GENE LIST>, this assumes that each gene ID will only be found in the relevant headers. So, if your gene ID is short or not unique I would suggest changing your FASTA files to fix this. 
+        
+#### Gene list
+This should be a single column file containing the relevant gene IDs. 
+
