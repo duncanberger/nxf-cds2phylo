@@ -18,9 +18,21 @@
 
 The pipeline takes a FASTA format file of unaligned nucleotide sequences (CDSs) for each gene/allele family and each sample. Then for every gene family, it aligns the CDS sequences across all sample where the sequence is provided. The alignments are trimmed and the remaining sequence are eiether concatenated into a supermatrix or retained as individual alignments (e.g. for partitioned analysis). Finally, phylogenetic inference is performed using RAXML, IQTREE or FastTree, depending on user specifications. 
 
-
 ## Installation <a name="install"></a>
+### Clone repository
+```
+git clone https://github.com/duncanberger/nxf-cds2phylo.git
+```
+### Create a virtual environment
+```
+mamba env create -f env.yaml
+```
 ## Running cds2phylo <a name="run"></a>
+### Single phylogeny
 ```
 nextflow run main.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
+```
+#### One phylogeny per-sample
+```
+nextflow run drak.nf --prefix <SAMPLE_ID> --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
 ```
