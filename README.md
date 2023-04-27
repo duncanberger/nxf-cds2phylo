@@ -50,7 +50,7 @@ Optional arguments:
 ```
 ### Single phylogeny
 ```
-nextflow run main.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
+nextflow run cds2phylo.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
 ```
 #### One phylogeny per-sample
 ```
