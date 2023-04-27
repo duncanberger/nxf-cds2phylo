@@ -32,7 +32,7 @@ mamba env create -f env.yaml
 ### Usage
 ```
 Usage:
-        nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta
+        nextflow run cds2phylo.nf  --fasta <FASTA> --input <GENE LIST>
 
 Mandatory arguments:
         --input                         Path to file containing list of geneIDs to include
