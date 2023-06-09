@@ -6,6 +6,8 @@
 * [Installation](#install)
 * [Running cds2phylo](#run)
 * [Input format](#input)
+* [Output format](#input)
+
 
 ## Introduction <a name="Introduction"></a>
 **cds2phylo** is a Nextflow pipeline for to create phylogenies based on alignments of large number of (core) genes. 
@@ -63,3 +65,17 @@ FASTA headers can be in any format but they will be searched using the <GENE LIS
 #### Gene list
 This should be a single column file containing the relevant gene IDs. 
 
+#### Prefix
+String within FASTA header to subset dataset, e.g. individual subpopulation IDs.
+ 
+## Output format <a name="output"></a>
+#### Concatenated core-gene alignment, including invariant sites: <br />
+{PREFIX}.aln    
+#### Concatenated core-gene alignment, excluding invariant sites: <br />   
+{PREFIX}.snpsites
+#### IQ-TREE phylogeny based on {PREFIX}.snpsites input: <br />
+{PREFIX}.iqtree_supertree.treefile
+#### IQ-TREE phylogeny based on partition analysis using individual core-gene alignments: <br />
+{PREFIX}.iqtree_partition.treefile
+#### FastTree phylogeny based on {PREFIX}.snpsites input: <br />
+{PREFIX}.fasttree
