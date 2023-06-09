@@ -1,14 +1,14 @@
 def helpMessage() {
         log.info"""
 Usage:
-        nextflow run cds2phylo.nf --input gene.list --fasta cds.fasta
+        nextflow run cds2phylo_subset.nf --input gene.list --fasta cds.fasta
 
 Mandatory arguments:
         --input                         Path to file containing list of geneIDs to include
         --fasta                         Path to file containing fasta sequences to process
+        --prefix                        Named group to include
 
 Optional arguments:
-        --prefix                        Output file prefix ["out"]
         --outdir                        Output directory ["results"]
         --phylo_model                   Use Fasttree or IQTREE ["fasttree"]
         --iqtree_parameters             Other parameters to pass to IQTREE [""]
