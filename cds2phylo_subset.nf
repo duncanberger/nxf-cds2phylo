@@ -6,10 +6,10 @@ Usage:
 Mandatory arguments:
         --input                         Path to file containing list of geneIDs to include
         --fasta                         Path to file containing fasta sequences to process
-        --prefix                        Named group to include
+        --subset                        File of sample IDs to include
 
 Optional arguments:
-        --outdir                        Output directory ["results"]
+        --prefix                        Output directory ["prefix"]
         --phylo_model                   Use Fasttree or IQTREE ["fasttree"]
         --iqtree_parameters             Other parameters to pass to IQTREE [""]
         --partition                     Do partitioned analysis instead of supermatrix [false]
@@ -36,7 +36,7 @@ params.outdir = "results"
 params.phylo_method = "fasttree"
 params.snpsites = true
 params.partition = false
-params.prefix = "out"
+params.subset = "input.list"
 params.iqtree_model_supermatrix = "MFP+ASC"
 params.iqtree_model_partition = "MFP"
 params.iqtree_parameters = ""
@@ -78,7 +78,7 @@ process split {
 
     script:
     """
-    seqkit grep -j 1 -r -n -p ${genes} <(grep -v '^=' $baseDir/${params.fasta}) | seqkit grep -j1 -r -n -f $baseDir/${params.prefix}.list > ${genes}.fa
+    seqkit grep -j 1 -r -n -p ${genes} <(grep -v '^=' $baseDir/${params.fasta}) | seqkit grep -j1 -r -n -f $baseDir/${params.subset} > ${genes}.fa
     """
 }
 
@@ -123,11 +123,11 @@ process concatx {
     path("*.trimal")
 
     output:
-    path("${params.prefix}.aln")
+    path("${params.subset}.aln")
 
     script:
     """
-    python $baseDir/scripts/concat_aln.py --input *.trimal --output ${params.prefix}.aln
+    python $baseDir/scripts/concat_aln.py --input *.trimal --output ${params.subset}.aln
     """
 }
 
@@ -137,14 +137,14 @@ process snpsites {
     publishDir "$params.outdir/", mode: 'copy'
 
     input:
-    path("${params.prefix}.aln")
+    path("${params.subset}.aln")
 
     output:
-    path("${params.prefix}.snpsites")
+    path("${params.subset}.snpsites")
 
     script:
     """
-    snp-sites ${params.prefix}.aln -o ${params.prefix}.snpsites
+    snp-sites ${params.subset}.aln -o ${params.subset}.snpsites
     """
 }
 
@@ -154,14 +154,14 @@ process fasttree {
     publishDir "$params.outdir/", mode:'copy'
 
     input:
-    path("${params.prefix}.snpsites")
+    path("${params.subset}.snpsites")
 
     output:
-    path("${params.prefix}.fasttree")
+    path("${params.subset}.fasttree")
 
     script:
     """
-    FastTreeMP -gtr -nt -log logfile < ${params.prefix}.snpsites > ${params.prefix}.fasttree
+    FastTreeMP -gtr -nt -log logfile < ${params.subset}.snpsites > ${params.subset}.fasttree
     """
 }
 
@@ -171,14 +171,14 @@ process iqtree_supertree {
     publishDir "$params.outdir/", mode:'copy'
 
     input:
-    path("${params.prefix}.snpsites")
+    path("${params.subset}.snpsites")
 
     output:
-    path("${params.prefix}.iqtree_supertree.treefile")
+    path("${params.subset}.iqtree_supertree.treefile")
 
     script:
     """
-    iqtree -T 4 -s ${params.prefix}.snpsites --prefix ${params.prefix}.iqtree_supertree -m ${params.iqtree_model_supermatrix} ${params.iqtree_parameters}
+    iqtree -T 4 -s ${params.subset}.snpsites --subset ${params.subset}.iqtree_supertree -m ${params.iqtree_model_supermatrix} ${params.iqtree_parameters}
     """
 }
 
@@ -191,12 +191,12 @@ process iqtree_partition {
     path("*.trimal")
 
     output:
-    path("${params.prefix}.iqtree_partition.treefile")
+    path("${params.subset}.iqtree_partition.treefile")
 
     script:
     """
     mkdir -p temp
     mv *.trimal temp/
-    iqtree -T 4 -p temp/ --prefix ${params.prefix}.iqtree_partition -m ${params.iqtree_model_partition} ${params.iqtree_parameters}
+    iqtree -T 4 -p temp/ --subset ${params.subset}.iqtree_partition -m ${params.iqtree_model_partition} ${params.iqtree_parameters}
     """
 }
