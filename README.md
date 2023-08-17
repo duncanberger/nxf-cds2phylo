@@ -60,13 +60,12 @@ nextflow run cds2phylo_subset.nf --prefix <SAMPLE_ID> --phylo_method iqtree --fa
 ```
 ## Input format <a name="input"></a>
 #### FASTA
-FASTA headers will be searched using the IDs in 'GENE LIST', this assumes that each gene ID will only be found in the relevant headers. So, if your gene ID is short or not unique I would suggest changing your FASTA files to fix this. 
+FASTA headers will be searched using the IDs in 'GENE LIST', this assumes that each gene ID will only be found in the relevant headers. So, if your gene ID is short/substring/not unique I would suggest changing your FASTA files to fix this. 
         
 #### Gene list
 This should be a single column file containing the relevant gene IDs. 
 
 #### Prefix
-String within FASTA header to subset dataset, e.g. individual subpopulation IDs.
  
 ## Output format <a name="output"></a>
 #### Concatenated core-gene alignment, including invariant sites: <br />
