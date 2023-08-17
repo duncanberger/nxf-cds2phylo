@@ -56,7 +56,7 @@ nextflow run cds2phylo.nf --phylo_method iqtree --fasta <FASTA> --input <GENE LI
 ```
 #### One phylogeny per-sample
 ```
-nextflow run cds2phylo_subset.nf --prefix <SAMPLE_ID> --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
+nextflow run cds2phylo_subset.nf --subset <SAMPLE_ID_LIST> --phylo_method iqtree --fasta <FASTA> --input <GENE LIST>
 ```
 ## Input format <a name="input"></a>
 #### FASTA
